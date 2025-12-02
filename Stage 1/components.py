@@ -92,3 +92,5 @@ board=initialise_board()
 print_board(board)
 print(legal_move("dark", (6,5), board))
 '''
+board=initialise_board()
+print_board(board)
