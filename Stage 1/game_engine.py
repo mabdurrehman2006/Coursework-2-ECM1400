@@ -15,6 +15,7 @@ def cli_coords_input():
         user_y=input("Enter Y coordinate(Between 1 to 8)")
         if user_y.isdigit():
             check=False
+            #below is commented out as I just check if its a digit now as the other validation happens in simple_game_loop to check whether the coordinate was on the board or not
             '''if int(user_y) in valid:
                 check=False'''
         else:
