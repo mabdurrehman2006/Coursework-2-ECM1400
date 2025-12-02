@@ -48,10 +48,10 @@ def legal_move(colour, coordinates, board_object):
     y_coordinate=coordinates[1]-1
     size=len(board_object)
     #following few lines of code validate if correct colour was entered
-    if colour=="Dark" or colour=="dark":
+    if colour=="Dark" or colour=="dark" or colour==dark:
         opponent_colour=light
         colour=dark
-    elif colour=="Light" or colour=="light":
+    elif colour=="Light" or colour=="light" or colour==light:
         opponent_colour=dark
         colour=light
     else:
