@@ -124,6 +124,31 @@
             messageBox.innerHTML += message + '\n';
             messageBox.scrollTop = messageBox.scrollHeight; // Auto-scroll to the bottom
         }
+        function save(){
+            fetch('/save')
+            .then(response => response.json())
+            .then(data => {
+            if (data['status'] === 'success'){ //I copied this from the sendMove function and then just modified it
+                    alert(data["message"]);       
+            }else if (data['status'] === 'fail'){
+                    alert(data["message"]);
+            }  
+            })
+        }
+        function load(){
+            fetch('/load')
+            .then(response => response.json())
+            .then(data => {
+            if (data['status'] === 'success'){ //I copied this from the sendMove function and then just modified it
+                    board=data["board"];
+                    loadBoard();
+                    updateMessageBox(data["message"]);
+                    updateMessageBox("It's " + data['player'] + "'s turn.");
+            }else if (data['status'] === 'fail'){
+                    alert(data["message"]);
+            }  
+            })
+        }
     </script>
 </head>
 <body>
@@ -143,6 +168,8 @@
             {% endfor %}
         </div>
     </div>
+    <button onclick="save()">Save Game</button>
+    <button onclick="load()">Load Game</button>
     <div id="messageBox" style="width: 80%; height: 10vh; border: 1px solid black; padding: 10px; overflow-y: auto;">
         <h2>Game Log:</h2>
     </div>

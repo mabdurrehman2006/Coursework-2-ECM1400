@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import flask
+import json
 from components import initialise_board, print_board, legal_move
 
 app = Flask(__name__)
@@ -11,37 +12,60 @@ none="None "
 #board=None
 #turn=dark
 
-def legal_move_check(board, player): #checks if there's any legal moves available
+def legal_move_check(board, player): #checks if there's any legal moves available and returns true if there is
     size=len(board)
     for x in range(size):
         for y in range(size):
-            if legal_move(player, (x, y), board):
+            if legal_move(player, (x+1, y+1), board):
                 return True
     return False
 
 @app.route('/')
 def start():
-    global board, turn, move_counter
+    global board, turn, move_counter #makes these 3 variables global variables so I can access them in other functions
     board=initialise_board()
     turn=dark
-    move_counter=60 #might take a while for me to figure out this part
-    return render_template('index.html', game_board=board)
+    move_counter=60 
+    return render_template("index.html", game_board=board)
 
 @app.route('/move')
 def move():
     global board, turn, move_counter
-    x=request.args.get('x')
-    y=request.args.get('y')
-    try:
-        x=int(x)
+    x=request.args.get("x") #fetches x coordinate
+    y=request.args.get("y") #fetches y coordiante
+    if move_counter <= 0: #checks if board is full
+                dark_score=0
+                light_score=0
+                #now calculates score if board is full
+                for x in range(0, size):
+                    for y in range(0, size):
+                        if board[y][x]==dark:
+                            dark_score+=1
+                        elif board[y][x]==light:
+                            light_score+=1
+                #prints winner
+                if dark_score<light_score:
+                    winner=light
+                    return jsonify(board=board, finished=f"{winner.strip()} has won")
+                elif dark_score>light_score:
+                    winner=dark
+                    return jsonify(board=board, finished=f"{winner.strip()} has won")
+                else:
+                    winner="draw"
+                    return jsonify(board=board, finished=f"It's a {winner}")
+    try: #tries to convert x and y coordinate to integers. They should always be integers anyway using the gui
+        x=int(x) 
         y=int(y)
     except:
         return jsonify(status="fail", message="coordinates not integers")
-    valid_move=legal_move(turn, (x, y), board)
-    if valid_move==True:
+    valid_move=legal_move(turn, (x, y), board) 
+    if valid_move==True: #checks if the move is valid
+        #now subtracts one from both x and y coordinates
         x_coordinate=x-1
-        y_coordinate=y-1
-        size=len(board)
+        y_coordinate=y-1 
+        size=len(board) #calculates size of board
+
+        #defines opponent colour because I copied the piece flipping code from my game_engine.py file
         if turn==dark:
             opponent_colour=light
         else:
@@ -78,7 +102,8 @@ def move():
                                 elif board[y1][x1]==none: #if its none it continues and tries the next value in possible_moves
                                     to_flip=[]
                                     break               
-                
+
+        #updates the coordinate selected and decreases move counter        
         board[y_coordinate][x_coordinate]=turn 
         move_counter-=1
         if move_counter==0: #checks if move counter has reached 0
@@ -90,14 +115,17 @@ def move():
                             dark_score+=1
                         elif board[y][x]==light:
                             light_score+=1
-                #prints winner
+                #prints winner this is really inefficient idk how I tried programming it at first like I really don't need winner= but I had the return jsonify outside the if statements before
                 if dark_score<light_score:
                     winner=light
+                    return jsonify(board=board, finished=f"{winner.strip()} has won")
                 elif dark_score>light_score:
                     winner=dark
+                    return jsonify(board=board, finished=f"{winner.strip()} has won")
                 else:
                     winner="draw"
-                return jsonify(status="success", board=board, finished=winner)
+                    return jsonify(board=board, finished=f"It's a {winner}")
+                
 
         if turn==dark:
             next_turn=light
@@ -107,8 +135,8 @@ def move():
         if legal_move_check(board, next_turn):
             turn=next_turn
             return jsonify(status="success", board=board, player=turn)
-        else:
-            if legal_move_check(board, turn)==False:
+        else: 
+            if legal_move_check(board, turn)==False: #checks if the current player cannot make a move and then counts score and outputs winner
                 dark_score=0
                 light_score=0
                 for x in range(0, size):
@@ -120,22 +148,52 @@ def move():
                 #prints winner
                 if dark_score<light_score:
                     winner=light
+                    return jsonify(board=board, finished=f"{winner.strip()} has won")
                 elif dark_score>light_score:
                     winner=dark
+                    return jsonify(board=board, finished=f"{winner.strip()} has won")
                 else:
                     winner="draw"
-                return jsonify(status="success", board=board, finished=winner)
-            else:
-                message=f"{next_turn.strip()} has no moves available. It is {turn.strip()}'s turn"
-                return jsonify(status="success", board=board, player=turn, message=message)
+                    return jsonify(board=board, finished=f"It's a {winner}")
+                
+            else: #Else it lets the current player take another turn as the opponent has no valid moves
+                return jsonify(status="success", board=board, player=turn)
                 
         
 
         
     else:
-        return jsonify(status="fail", message="Invalid coordinates")
+        return jsonify(status="fail", message="Invalid coordinates") #just in case anything goes wrong but it can't really you just select the coordinates on the gui
 
-app.run()
+@app.route('/save')
+def save(): 
+    global turn, move_counter, board
+    game={"board": board, "turn": turn, "move counter": move_counter}
+    try: #tries to save game to json file. Saves board, turn and move_counter
+        with open("game_save.json", "w") as file:
+            json.dump(game, file)
+        return jsonify(status="success", message="Game saved")
+    except:
+        return jsonify(status="failed", message=f"Could not save game")
+    
+@app.route('/load')
+def load():
+    global turn, move_counter, board
+    try: #tries to open json file and then read it and load board, turn and move_counter
+        with open("game_save.json", "r") as file:
+            game=json.load(file)
+            board=game["board"]
+            turn=game["turn"]
+            move_counter=game["move counter"]
+        return jsonify(status="success", board=board, player=turn, message="Game loaded")
+    except:
+        return jsonify(status="failed", message=f"Could not load game")
+
+
+
+
+if __name__=="__main__": #didn't say to do this but I'm keeping it here
+    app.run()
 
 
 
