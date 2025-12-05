@@ -1,23 +1,21 @@
+from components import initialise_board, print_board, legal_move
+
 def cli_coords_input():
-    valid=[1, 2, 3, 4, 5, 6, 7, 8]
+    '''Asks user for x and y coordinates and validates them'''
     check=True
-    while check==True: #while loop to ensure that X coordinate is valid
+    while check is True: #while loop to ensure that X coordinate is valid
         user_x=input("Enter X coordinate(Between 1 to 8)")
         if user_x.isdigit():
             check=False
-            '''if int(user_x) in valid:
-                check=False'''
         else:
             print("Invalid X coordinate")
             check=True
     check=True
-    while check==True: #while loop to ensure that Y coordinate is valid
+    while check is True: #while loop to ensure that Y coordinate is valid
         user_y=input("Enter Y coordinate(Between 1 to 8)")
         if user_y.isdigit():
             check=False
-            #below is commented out as I just check if its a digit now as the other validation happens in simple_game_loop to check whether the coordinate was on the board or not
-            '''if int(user_y) in valid:
-                check=False'''
+           #other validation happens in simple_game_loop to check if the coordinate was on the board
         else:
             print("Invalid Y coordinate")
             check=True
@@ -29,8 +27,10 @@ dark="Dark "
 none="None "
 
 def simple_game_loop():
+    '''Runs the main game loop. 
+    Handles player turns, input validation(checking if coordinates are on the board)
+    Handles game end scenarios'''
     print("\n Welcome to this othello game \n")
-    from components import initialise_board, print_board, legal_move
     board=initialise_board()
     print_board(board)
     size=len(board)
@@ -44,64 +44,76 @@ def simple_game_loop():
         move_available=False
         for x in range(0, size):
             for y in range(0, size):
-                    turn_available=legal_move(turn, (x+1, y+1), board)
-                    if turn_available==True:
-                        move_available=True
-                        break
-                    else:
-                        continue
-        if move_available==False:
-                legal_move_available1+=1
-                if turn==dark:
-                     turn=light
+                turn_available=legal_move(turn, (x+1, y+1), board)
+                if turn_available is True:
+                    move_available=True
+                    break
                 else:
-                     turn=dark
-                continue
+                    continue
+        if move_available is False:
+            legal_move_available1+=1
+            if turn==dark:
+                turn=light
+            else:
+                turn=dark
+            continue
         legal_move_available1=0
-        
+
         coord_validation=False
-        
+
         #this loop checks if coordinates are valid
-        while coord_validation==False:
-             coord=cli_coords_input()
-             valid_coord=legal_move(turn, coord, board)
-             #print(valid_coord)
-             if valid_coord==True:
-                  coord_validation=True
-             else:
-                  print(f"Not legal move. Try again. Coordinates must be between 1 and {size}")
-                  continue
-        
-        
+        while coord_validation is False:
+            coord=cli_coords_input()
+            valid_coord=legal_move(turn, coord, board)
+            #print(valid_coord)
+            if valid_coord is True:
+                coord_validation=True
+            else:
+                print(f"Not legal move. Try again. Coordinates must be between 1 and {size}")
+                continue
+
         x_coordinate=coord[0]-1
         y_coordinate=coord[1]-1
         if turn==dark:
             opponent_colour=light
-        elif turn==light:
+        else:
             opponent_colour=dark
 
         to_flip=[]
-        #Now to flip each piece. This code is copied from my components.py file and then modified for this because I decided to be lazy
+        #Now to flip each piece.
+        # This code is copied from my components.py file
+        # then I modified for this because I decided to be lazy
         possible_moves=[[1, 0], [-1, 0], [0, 1], [0, -1], [-1, 1], [-1, -1], [1, -1], [1, 1]]
         if x_coordinate>-1 and x_coordinate<size: #validates that x coordinate is within range
             if y_coordinate>-1 and y_coordinate<size: #validates that y coordinate is within range
                 if board[y_coordinate][x_coordinate]==none:
-                    for m in possible_moves: #now validates that if pieces can be outflanked I think that's the criteria for a valid move I barely understand this game
+                    for m in possible_moves:
+                        #now validates that if pieces can be outflanked
+                        # I think that's the criteria for a valid move
+                        # I barely understand this game
                         x1=x_coordinate+m[0]
                         y1=y_coordinate+m[1]
-                        if x1<0 or x1>size-1: #makes sure nothing messes up if x coordinates are outside board
+                        if x1<0 or x1>size-1:
+                            #makes sure nothing messes up if x coordinates are outside board
                             continue
-                        if y1<0 or y1>size-1: #makes sure nothing messes up if y coordinates are outside board WHY IS THERE SO MUCH VALIDATION I NEED TO DO
+                        if y1<0 or y1>size-1:
+                            #makes sure nothing messes up if y coordinates are outside board
+                            # WHY IS THERE SO MUCH VALIDATION I NEED TO DO
                             continue
-                        if board[y1][x1]==opponent_colour: #yeah this was annoying to code, checking if all spaces next to the coordinate are opponent colour or not and tries to find if pieces can be outflanked
+                        if board[y1][x1]==opponent_colour:
+                            #yeah this was annoying to code
+                            # checking if all spaces next to the coordinate are opponent colour or not
+                            # then tries to find if pieces can be outflanked
                             while True: #now checks if pieces can be outflanked
                                 to_flip.append([x1, y1])
                                 x1=x1+m[0]
                                 y1=y1+m[1]
-                                if x1<0 or x1>size-1: #makes sure no errors appear if x coordinates are outside board
+                                if x1<0 or x1>size-1:
+                                    #makes sure no errors appear if x coordinates are outside board
                                     to_flip=[]
                                     break
-                                if y1<0 or y1>size-1: #makes sure no errors appear if y coordinates are outside board
+                                if y1<0 or y1>size-1:
+                                    #makes sure no errors appear if y coordinates are outside board
                                     to_flip=[]
                                     break
                                 if board[y1][x1]==turn: #if its the colour its a valid move yay
@@ -109,12 +121,13 @@ def simple_game_loop():
                                         board[t[1]][t[0]]=turn
                                     to_flip=[]
                                     break
-                                elif board[y1][x1]==none: #if its none it continues and tries the next value in possible_moves
+                                elif board[y1][x1]==none:
+                                #if its none it continues and tries the next value in possible_moves
                                     to_flip=[]
-                                    break               
-                
-        board[y_coordinate][x_coordinate]=turn 
-        move_counter-=1 #decreases move counter 
+                                    break             
+
+        board[y_coordinate][x_coordinate]=turn
+        move_counter-=1 #decreases move counter
 
         #Now changes the turn to other colour
         if turn==dark:
@@ -123,7 +136,7 @@ def simple_game_loop():
             turn=dark
         print_board(board)
         continue
-    
+
     #Calculates score
     dark_score=0
     light_score=0
@@ -133,7 +146,7 @@ def simple_game_loop():
                 dark_score+=1
             elif board[y][x]==light:
                 light_score+=1
-    
+
     #prints score
     print(f"Dark score: {dark_score}")
     print(f"Light score: {light_score}")
@@ -146,10 +159,6 @@ def simple_game_loop():
     else:
         print("Draw")
 
-             
-            
-        
-             
-        
+
 if __name__=="__main__":
     simple_game_loop()
