@@ -33,6 +33,7 @@ def move():
     global board, turn, move_counter
     x=request.args.get("x") #fetches x coordinate
     y=request.args.get("y") #fetches y coordiante
+    size=len(board) #calculates size of board
     if move_counter <= 0: #checks if board is full
                 dark_score=0
                 light_score=0
@@ -63,7 +64,7 @@ def move():
         #now subtracts one from both x and y coordinates
         x_coordinate=x-1
         y_coordinate=y-1 
-        size=len(board) #calculates size of board
+        
 
         #defines opponent colour because I copied the piece flipping code from my game_engine.py file
         if turn==dark:
