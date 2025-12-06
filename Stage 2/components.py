@@ -9,9 +9,9 @@ none="None "
 def initialise_board(size=8):
     '''Initialises board and puts pieces in the middle 4 coordinates'''
     board_temp=[] #temp list for board
-    for x in range(0, size):
+    for _ in range(0, size):
         temp_none=[] #temp list for storing none values
-        for y in range(0, size):
+        for _ in range(0, size):
             temp_none.append(none)
         board_temp.append(temp_none)
     #print(board_temp)
