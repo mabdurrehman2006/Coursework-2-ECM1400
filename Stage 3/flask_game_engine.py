@@ -3,8 +3,8 @@ Handles initialising game, loading game, saving game and moves and game over sce
 then returns values to the gui code
 '''
 import json
-from flask import Flask, render_template, request, jsonify
 import copy
+from flask import Flask, render_template, request, jsonify
 from components import initialise_board, legal_move
 
 app = Flask(__name__)
@@ -80,7 +80,7 @@ def flip_pieces(player, board_object, x_coordinate, y_coordinate):
                             elif board_object[y1][x1]==none:
                                 #if its none it continues and tries the next value in possible_moves
                                 to_flip=[]
-                                break             
+                                break
 
         #updates the coordinate selected and decreases move counter
     board_object[y_coordinate][x_coordinate]=player
@@ -112,7 +112,7 @@ def start():
     global board, turn, move_counter
     board=initialise_board()
     turn=dark
-    move_counter=60 
+    move_counter=60
     return render_template("index.html", game_board=board)
 
 @app.route('/move')
@@ -153,11 +153,11 @@ def move():
         y=int(y)
     except ValueError:
         return jsonify(status="fail", message="coordinates not integers")
-    valid_move=legal_move(turn, (x, y), board) 
+    valid_move=legal_move(turn, (x, y), board)
     if valid_move is True: #checks if the move is valid
         #now subtracts one from both x and y coordinates
         x_coordinate=x-1
-        y_coordinate=y-1      
+        y_coordinate=y-1
 
     #defines opponent colour because I copied the piece flipping code from my game_engine.py file
         if turn==dark:
@@ -207,9 +207,9 @@ def move():
                                 elif board[y1][x1]==none:
                                 #if its none it continues and tries the next value in possible_moves
                                     to_flip=[]
-                                    break              
+                                    break
 
-        #updates the coordinate selected and decreases move counter   
+        #updates the coordinate selected and decreases move counter
         board[y_coordinate][x_coordinate]=turn
         move_counter-=1
         if move_counter==0: #checks if move counter has reached 0
@@ -237,10 +237,73 @@ def move():
             next_turn=light
         else:
             next_turn=dark
-        #Now checks if next player can make a move
+        #Now checks if next player(ai) can make a move
         if legal_move_check(board, next_turn):
             turn=next_turn
-            return jsonify(status="success", board=board, player=turn)
+            ai_move=opponent_ai(turn, board)#ai finds best move
+            if ai_move: #now executes the move
+                ai_x_coordinate=ai_move[0]
+                ai_y_coordinate=ai_move[1]
+                flip_pieces(turn, board, ai_x_coordinate, ai_y_coordinate)#now executes the move
+                move_counter-=1
+                if move_counter<=0:#checks if counter is 0 and game is over
+                    dark_score=0
+                    light_score=0
+                    #now calculates score if board is full
+                    for x in range(0, size):
+                        for y in range(0, size):
+                            if board[y][x]==dark:
+                                dark_score+=1
+                            elif board[y][x]==light:
+                                light_score+=1
+                    #prints winner
+                    if dark_score<light_score:
+                        winner=light
+                        return jsonify(board=board, finished=f"{winner.strip()} has won")
+                    elif dark_score>light_score:
+                        winner=dark
+                        return jsonify(board=board, finished=f"{winner.strip()} has won")
+                    else:
+                        winner="draw"
+                        return jsonify(board=board, finished=f"It's a {winner}")
+                turn=dark
+                if legal_move_check(board, turn): #checks if player can move
+                    return jsonify(status="success", board=board, player=turn)
+                else: #if player can't make move
+                    #I tried accounting for this but it's a bit annoying
+                    #It might not work/handle all cases properly
+                    if legal_move_check(board, next_turn): #checks if ai can make move
+                        turn=next_turn
+                        ai_move=opponent_ai(turn, board)#ai finds best move
+                        if ai_move: #now executes the move
+                            ai_x_coordinate=ai_move[0]
+                            ai_y_coordinate=ai_move[1]
+                            #now executes the move
+                            flip_pieces(turn, board, ai_x_coordinate, ai_y_coordinate)
+                            move_counter-=1
+                            turn=dark
+                            return jsonify(status="success", board=board, player=turn)
+                    else: #calculates score for game over
+                        dark_score=0
+                        light_score=0
+                        #now calculates score if board is full
+                        for x in range(0, size):
+                            for y in range(0, size):
+                                if board[y][x]==dark:
+                                    dark_score+=1
+                                elif board[y][x]==light:
+                                    light_score+=1
+                        #prints winner
+                        if dark_score<light_score:
+                            winner=light
+                            return jsonify(board=board, finished=f"{winner.strip()} has won")
+                        elif dark_score>light_score:
+                            winner=dark
+                            return jsonify(board=board, finished=f"{winner.strip()} has won")
+                        else:
+                            winner="draw"
+                            return jsonify(board=board, finished=f"It's a {winner}")
+
         else:
             if legal_move_check(board, turn) is False:
             #checks if the current player cannot make a move and then counts score

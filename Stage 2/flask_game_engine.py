@@ -73,11 +73,11 @@ def move():
         y=int(y)
     except ValueError:
         return jsonify(status="fail", message="coordinates not integers")
-    valid_move=legal_move(turn, (x, y), board) 
+    valid_move=legal_move(turn, (x, y), board)
     if valid_move is True: #checks if the move is valid
         #now subtracts one from both x and y coordinates
         x_coordinate=x-1
-        y_coordinate=y-1      
+        y_coordinate=y-1
 
     #defines opponent colour because I copied the piece flipping code from my game_engine.py file
         if turn==dark:
@@ -127,9 +127,9 @@ def move():
                                 elif board[y1][x1]==none:
                                 #if its none it continues and tries the next value in possible_moves
                                     to_flip=[]
-                                    break              
+                                    break
 
-        #updates the coordinate selected and decreases move counter       
+        #updates the coordinate selected and decreases move counter
         board[y_coordinate][x_coordinate]=turn
         move_counter-=1
         if move_counter==0: #checks if move counter has reached 0
