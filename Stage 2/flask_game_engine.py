@@ -206,7 +206,7 @@ def save():
             json.dump(game, file)
         return jsonify(status="success", message="Game saved")
     except Exception as e:
-        return jsonify(status="failed", message=f"Could not save game: {e}")
+        return jsonify(status="fail", message=f"Could not save game: {e}")
 
 @app.route('/load')
 def load():
@@ -222,7 +222,7 @@ def load():
             move_counter=game["move counter"]
         return jsonify(status="success", board=board, player=turn, message="Game loaded")
     except Exception as e:
-        return jsonify(status="failed", message=f"Could not load game: {e}")
+        return jsonify(status="fail", message=f"Could not load game: {e}")
 
 
 

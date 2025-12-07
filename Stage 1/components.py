@@ -38,13 +38,15 @@ def print_board(board):
     size=len(board)
     print(" ", end="|")
     for z in range(0, size):
-        #yeah printing numbers for columns and rows makes it easier to test as well. This line is for columns
-        print(z+1, end="    |") 
-    print("\n") #added numbers because it's easier to enter coordinates I barely understand this game right now this just makes it go next line instead of printing in this line
+        #yeah printing numbers for columns and rows makes it easier to test as well.
+        # The line below is for columns
+        print(z+1, end="    |")
+        #added numbers because it's easier to enter coordinates and visualise
+    print("\n") #makes it go to next line
     for x in range(0, size):
         print(x+1, end="|") #prints the number for the rows
         for y in range(0, size):
-            print(board[x][y], end="|")#Had "light" to 5 characters and if I left end="" it would combine the light and dark into one word so it looks better with a |
+            print(board[x][y], end="|")#leaves a | between pieces/counters
         print("\n")
 
 possible_moves=[[1, 0], [-1, 0], [0, 1], [0, -1], [-1, 1], [-1, -1], [1, -1], [1, 1]]
@@ -66,24 +68,32 @@ def legal_move(colour, coordinates, board_object):
     if x_coordinate>-1 and x_coordinate<size: #validates that x coordinate is within range
         if y_coordinate>-1 and y_coordinate<size: #validates that y coordinate is within range
             if board_object[y_coordinate][x_coordinate]==none:
-                for m in possible_moves: #now validates that if pieces can be outflanked I think that's the criteria for a valid move I barely understand this game
+                for m in possible_moves: 
+                    #now validates that if pieces can be outflanked
                     x1=x_coordinate+m[0]
                     y1=y_coordinate+m[1]
-                    if x1<0 or x1>size-1: #makes sure nothing messes up if x coordinates are outside board
+                    if x1<0 or x1>size-1:
+                        #makes sure nothing messes up if x coordinates are outside board
                         continue
-                    if y1<0 or y1>size-1: #makes sure nothing messes up if y coordinates are outside board WHY IS THERE SO MUCH VALIDATION I NEED TO DO
+                    if y1<0 or y1>size-1:
+                        #makes sure nothing messes up if y coordinates are outside board
                         continue
-                    if board_object[y1][x1]==opponent_colour: #yeah this was annoying to code, checking if all spaces next to the coordinate are opponent colour or not and tries to find if pieces can be outflanked
+                    if board_object[y1][x1]==opponent_colour: 
+                        #checking if all spaces next to the coordinate are opponent colour or not
+                        #Then tries to find if pieces can be outflanked
                         while True: #now checks if pieces can be outflanked
                             x1=x1+m[0]
                             y1=y1+m[1]
-                            if x1<0 or x1>size-1: #makes sure no errors appear if x coordinates are outside board
+                            if x1<0 or x1>size-1:
+                                #makes sure no errors appear if x coordinates are outside board
                                 break
-                            if y1<0 or y1>size-1: #makes sure no errors appear if y coordinates are outside board
+                            if y1<0 or y1>size-1:
+                                #makes sure no errors appear if y coordinates are outside board
                                 break
                             if board_object[y1][x1]==colour: #if its the colour its a valid move yay
                                 return True
-                            elif board_object[y1][x1]==none: #if its none it continues and tries the next value in possible_moves
+                            elif board_object[y1][x1]==none:
+                                #if its none it continues and tries the next value in possible_moves
                                 break
             else:
                 return False
