@@ -17,7 +17,7 @@ board=None
 turn=dark
 move_counter=60
 
-def legal_move_check(board_object, player): 
+def legal_move_check(board_object, player):
     '''checks if there's any legal moves available and returns true if there is'''
     size=len(board_object)
     for x in range(size):

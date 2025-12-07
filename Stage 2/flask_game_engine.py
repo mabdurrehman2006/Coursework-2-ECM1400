@@ -16,7 +16,7 @@ board=None
 turn=dark
 move_counter=60
 
-def legal_move_check(board_object, player): 
+def legal_move_check(board_object, player):
     '''checks if there's any legal moves available and returns true if there is'''
     size=len(board_object)
     for x in range(size):
@@ -32,7 +32,7 @@ def start():
     global board, turn, move_counter
     board=initialise_board()
     turn=dark
-    move_counter=60 
+    move_counter=60
     return render_template("index.html", game_board=board)
 
 @app.route('/move')
