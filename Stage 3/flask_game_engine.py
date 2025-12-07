@@ -4,6 +4,7 @@ then returns values to the gui code
 '''
 import json
 from flask import Flask, render_template, request, jsonify
+import copy
 from components import initialise_board, legal_move
 
 app = Flask(__name__)
@@ -24,6 +25,85 @@ def legal_move_check(board_object, player):
             if legal_move(player, (x+1, y+1), board_object):
                 return True
     return False
+
+def flip_pieces(player, board_object, x_coordinate, y_coordinate):
+    '''Flips pieces and returns amount of pieces flipped'''
+    #defines opponent colour because I copied the piece flipping code from my game_engine.py file
+    if player==dark:
+        opponent_colour=light
+    else:
+        opponent_colour=dark
+    possible_moves=[[1, 0], [-1, 0], [0, 1], [0, -1], [-1, 1], [-1, -1], [1, -1], [1, 1]]
+    to_flip=[]
+    size=len(board_object)
+    #score to count how many pieces flipped
+    flipped_score=0
+
+    if x_coordinate>-1 and x_coordinate<size: #validates that x coordinate is within range
+        if y_coordinate>-1 and y_coordinate<size: #validates that y coordinate is within range
+            if board_object[y_coordinate][x_coordinate]==none:
+                for m in possible_moves:
+                    #now validates that if pieces can be outflanked
+                    #I think that's the criteria for a valid move I barely understand this game
+                    to_flip=[]
+                    x1=x_coordinate+m[0]
+                    y1=y_coordinate+m[1]
+                    if x1<0 or x1>size-1:
+                        #makes sure nothing messes up if x coordinates are outside board
+                        continue
+                    if y1<0 or y1>size-1:
+                        #makes sure nothing messes up if y coordinates are outside board
+                        #WHY IS THERE SO MUCH VALIDATION I NEED TO DO
+                        continue
+                    if board_object[y1][x1]==opponent_colour:
+                        #yeah this was annoying to code
+                        #checking if all spaces next to the coordinate are opponent colour
+                        #tries to find if pieces can be outflanked
+                        while True: #now checks if pieces can be outflanked
+                            to_flip.append([x1, y1])
+                            x1=x1+m[0]
+                            y1=y1+m[1]
+                            if x1<0 or x1>size-1:
+                                #makes sure no errors appear if x coordinates are outside board
+                                to_flip=[]
+                                break
+                            if y1<0 or y1>size-1:
+                                #makes sure no errors appear if y coordinates are outside board
+                                to_flip=[]
+                                break
+                            if board_object[y1][x1]==player: #if its the colour its a valid move yay
+                                for t in to_flip: #now flips the piece
+                                    board_object[t[1]][t[0]]=player
+                                    flipped_score+=1
+                                to_flip=[]
+                                break
+                            elif board_object[y1][x1]==none:
+                                #if its none it continues and tries the next value in possible_moves
+                                to_flip=[]
+                                break             
+
+        #updates the coordinate selected and decreases move counter
+    board_object[y_coordinate][x_coordinate]=player
+    return flipped_score
+
+def opponent_ai(player, board_object):
+    '''Function that figures out what the best move AI can make is and executes it'''
+    #Using turn and board instead of player and board_object decreases my pylint score
+    #That's annoying I had to change the variable names
+    best_move=None
+    best_score=None
+    size=len(board_object)
+    for x in range(size):
+        for y in range(size):
+            if legal_move(player, (x+1, y+1), board_object):
+                duplicate_board=copy.deepcopy(board_object) #.copy() was giving me trouble here
+                score=flip_pieces(player, duplicate_board, x, y)
+                if best_score is None or score>best_score:
+                    best_score=score
+                    best_move=(x, y)
+    return best_move
+
+
 
 @app.route('/')
 def start():
@@ -129,7 +209,7 @@ def move():
                                     to_flip=[]
                                     break              
 
-        #updates the coordinate selected and decreases move counter       
+        #updates the coordinate selected and decreases move counter   
         board[y_coordinate][x_coordinate]=turn
         move_counter-=1
         if move_counter==0: #checks if move counter has reached 0
