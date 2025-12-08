@@ -53,7 +53,6 @@ def flip_pieces(player, board_object, x_coordinate, y_coordinate):
                         continue
                     if y1<0 or y1>size-1:
                         #makes sure nothing messes up if y coordinates are outside board
-                        #WHY IS THERE SO MUCH VALIDATION I NEED TO DO
                         continue
                     if board_object[y1][x1]==opponent_colour:
                         #yeah this was annoying to code
@@ -159,58 +158,8 @@ def move():
         x_coordinate=x-1
         y_coordinate=y-1
 
-    #defines opponent colour because I copied the piece flipping code from my game_engine.py file
-        if turn==dark:
-            opponent_colour=light
-        else:
-            opponent_colour=dark
-        possible_moves=[[1, 0], [-1, 0], [0, 1], [0, -1], [-1, 1], [-1, -1], [1, -1], [1, 1]]
-        to_flip=[]
-
-        if x_coordinate>-1 and x_coordinate<size: #validates that x coordinate is within range
-            if y_coordinate>-1 and y_coordinate<size: #validates that y coordinate is within range
-                if board[y_coordinate][x_coordinate]==none:
-                    for m in possible_moves:
-                        #now validates that if pieces can be outflanked
-                        #I think that's the criteria for a valid move I barely understand this game
-                        to_flip=[]
-                        x1=x_coordinate+m[0]
-                        y1=y_coordinate+m[1]
-                        if x1<0 or x1>size-1:
-                            #makes sure nothing messes up if x coordinates are outside board
-                            continue
-                        if y1<0 or y1>size-1:
-                            #makes sure nothing messes up if y coordinates are outside board
-                            #WHY IS THERE SO MUCH VALIDATION I NEED TO DO
-                            continue
-                        if board[y1][x1]==opponent_colour:
-                            #yeah this was annoying to code
-                            #checking if all spaces next to the coordinate are opponent colour
-                            #tries to find if pieces can be outflanked
-                            while True: #now checks if pieces can be outflanked
-                                to_flip.append([x1, y1])
-                                x1=x1+m[0]
-                                y1=y1+m[1]
-                                if x1<0 or x1>size-1:
-                                    #makes sure no errors appear if x coordinates are outside board
-                                    to_flip=[]
-                                    break
-                                if y1<0 or y1>size-1:
-                                    #makes sure no errors appear if y coordinates are outside board
-                                    to_flip=[]
-                                    break
-                                if board[y1][x1]==turn: #if its the colour its a valid move yay
-                                    for t in to_flip: #now flips the piece
-                                        board[t[1]][t[0]]=turn
-                                    to_flip=[]
-                                    break
-                                elif board[y1][x1]==none:
-                                #if its none it continues and tries the next value in possible_moves
-                                    to_flip=[]
-                                    break
-
-        #updates the coordinate selected and decreases move counter
-        board[y_coordinate][x_coordinate]=turn
+        #calls flip_pieces function to flip pieces
+        flip_pieces(turn, board, x_coordinate, y_coordinate)
         move_counter-=1
         if move_counter==0: #checks if move counter has reached 0
             dark_score=0

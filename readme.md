@@ -1,7 +1,7 @@
 # Project Details
 Author: Muhammad Abdur Rehman
 
-Not gonna bother with my student ID here it's a public github repository. It'll in the name of the final zip file I submit
+Student ID: 750062970
 
 Continuous Assessment 2
 
@@ -78,12 +78,8 @@ Sends requests to the flask server when a user clicks something and then fetches
 Updates the board to show the result of moves
 
 ## Reasoning for decisions made
-Code isn't the cleanest. I could've removed a large amount of stuff in the move function and called the flip_pieces function and made it look cleaner overall. I just copied it over from stage 2 and just decided to leave it as it is because if it isn't broken don't fix it. The pylint score was high enough. If I had more time I would definitely clean the code up more.
+Code isn't the cleanest. I definitely could've done better. I tried to clean it up as much as I can and reduce repetitive code
 
 The AI just selects the move with the most pieces flipped because it seemed like the easiest one to program and was also the first idea that came to me. 
-
-
-# License
-idk what to put here. I'm a tad bit clueless on this part. Too late to email to ask.
 
 
